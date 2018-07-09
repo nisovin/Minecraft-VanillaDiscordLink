@@ -12,10 +12,10 @@ This should work with pretty much any vanilla Minecraft version. It will probabl
 Setup
 -----
 
-* Install [https://nodejs.org/en/download/](NodeJS)
+* Install [NodeJS](https://nodejs.org/en/download/)
 * Put the index.js, config.js, and package.json files into a folder
 * Run ```npm install``` to install dependencies
-* [https://discordapp.com/developers/applications/me](Set up a Discord bot) and get a login token
+* [Set up a Discord bot](https://discordapp.com/developers/applications/me) and get a login token
 
 Config
 ------
@@ -32,7 +32,7 @@ Update the config.js file with your own data.
 Running
 -------
 
-You can run this however you want, I recommend using [https://www.npmjs.com/package/forever](forever).
+You can run this however you want, I recommend using [forever](https://www.npmjs.com/package/forever).
 
 ```
 npm install forever -g
