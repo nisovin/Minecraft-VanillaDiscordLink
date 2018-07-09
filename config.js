@@ -21,7 +21,7 @@ module.exports = {
 	
 	// function to turn a message from discord into a raw json message for minecraft
 	prepRawMessage: function(author, text, message) {
-		text = text.replace(/[^A-Za-z0-9 !#$%&*(),.?'":;]/g, ''); // clean message
+		text = text.replace(/[^A-Za-z0-9 !(),.?':;_\-+]/g, ''); // clean message
 		return [
 			{"text": "["},
 			{"text": "D", color: "blue"},
