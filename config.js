@@ -15,11 +15,13 @@ module.exports = {
 	// function to turn a console command into a shell command to be injected into the minecraft server
 	prepConsoleCommand: function(cmd) {
 		var screenName = 'minecraft'; // name of screen session
+		// this is probably dangerous
 		return 'screen -x ' + screenName + ' -X stuff "' + cmd.replace(/"/g, '\\"') + '$(printf \'\\r\')"';
 	},
 	
 	// function to turn a message from discord into a raw json message for minecraft
 	prepRawMessage: function(author, text, message) {
+		text = text.replace(/[^A-Za-z0-9 !#$%&*(),.?'":;]/g, ''); // clean message
 		return [
 			{"text": "["},
 			{"text": "D", color: "blue"},
