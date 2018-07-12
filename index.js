@@ -1,11 +1,14 @@
 var Discord = require('discord.js');
 var Tail = require('tail').Tail;
+var Rcon = require('rcon');
 var exec = require('child_process').exec;
 var config = require('./config.js');
 
 // globals
 var gameChannel = null;
 var consoleChannel = null;
+var rcon = null;
+var rconConnected = false;
 var bot = null;
 var botUserId = 0;
 var regexConsoleLine = /^\[[0-9]{2}:[0-9]{2}:[0-9]{2}\] \[Server thread\/INFO\]: /
@@ -20,10 +23,37 @@ tail = new Tail(config.logFile, {
 });
 tail.on("line", processConsoleLine);
 
+// start rcon
+function startRcon() {
+	rcon = new Rcon(config.rconHost, config.rconPort, config.rconPassword);
+	rcon.on('auth', function() {
+		console.log('Rcon connected');
+		rconConnected = true;
+	});
+	rcon.on('response', function(str) {
+		//console.log('Rcon response', str);
+	});
+	rcon.on('error', function(err) {
+		console.log('Rcon error', err);
+		if (!rcon.hasAuthed) {
+			setTimeout(startRcon, 5000);
+		}
+	});
+	rcon.on('end', function() {
+		console.log('Rcon disconnected');
+		rconConnected = false;
+		setTimeout(startRcon, 5000);
+	});
+	rcon.connect();
+}
+if (config.useRcon) {
+	startRcon();
+}
+
 // start discord
 bot = new Discord.Client();
 bot.on('ready', function() {
-	console.log('Ready!');
+	console.log('Discord connected');
 	botUserId = bot.user.id;
 	gameChannel = bot.channels.get(config.gameChannelId);
 	consoleChannel = bot.channels.get(config.consoleChannelId);
@@ -35,9 +65,14 @@ bot.on('message', processDiscordChat);
 function processDiscordChat(message) {
 	if (message.author.id == botUserId) return;
 	if (message.channel.id == config.gameChannelId) {
+		// get and clean author and message
 		var author = message.author.username;
 		if (message.member && message.member.nickname) author = message.member.nickname;
 		var text = message.content;
+		author = author.replace(/[^A-Za-z0-9_\- ]/g, '');
+		text = text.replace(/[^A-Za-z0-9 !(),.?':;_\-+]/g, '');
+		if (text.length > 250) text = text.substr(0, 250);
+		// build and send json
 		var json = config.prepRawMessage(author, text, message);
 		tellRaw(json);
 	} else if (message.channel.id == config.consoleChannelId) {
@@ -85,22 +120,27 @@ function processConsoleLine(line) {
 		var list = match[2];
 		if (gameChannel != null) {
 			gameChannel.send("**Players online: **" + list);
-			/*gameChannel.setTopic("There are " + count + " players in game: " + list)
-				.catch(function(e) {
-					console.log('settopic error', e);
-				});*/
 		}
 		return;
 	}
 }
 
+// send console command, use rcon if possible, fall back to shell command
 function sendConsoleCommand(cmd) {
-	var shell = config.prepConsoleCommand(cmd);
-	exec(shell, function(err, out, code) {
-		console.log(out);
-	});
+	if (rconConnected) {
+		console.log('sending rcon cmd');
+		rcon.send(cmd);
+	} else {
+		var shell = config.prepConsoleCommand(cmd);
+		if (shell) {
+			exec(shell, function(err, out, code) {
+				console.log(out);
+			});
+		}
+	}
 }
 
+// build tellraw command
 function tellRaw(json) {
 	var raw = JSON.stringify(json);
 	var cmd = "tellraw @a " + raw;

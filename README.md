@@ -15,6 +15,7 @@ Setup
 * Install [NodeJS](https://nodejs.org/en/download/)
 * Put the index.js, config.js, and package.json files into a folder
 * Run ```npm install``` to install dependencies
+* Turn on rcon in your [server.properties file](https://minecraft.gamepedia.com/Server.properties) and set up a password
 * [Set up a Discord bot](https://discordapp.com/developers/applications/me) and get a login token
 
 Config
@@ -26,6 +27,7 @@ Update the config.js file with your own data.
 * Channel IDs can be found in Discord by turning on Developer mode.
 * Be careful with consoleChannelId! If you set this, anyone in that channel will be able to run commands on your server.
 * Provide the full path to the server's log file.
+* Add your server rcon auth parameters.
 * Change the prepConsoleCommand function to set your own screen name (or modify it to work some other way if desired).
 * Change the appearance of discord messages in-game (if desired) by modifying the prepRawMessage function.
 

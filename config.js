@@ -12,7 +12,13 @@ module.exports = {
 	// path to the server log file
 	logFile: '/home/user/minecraftserver/logs/latest.log',
 	
-	// function to turn a console command into a shell command to be injected into the minecraft server
+	// rcon info
+	useRcon: true,
+	rconHost: 'localhost',
+	rconPort: 25575,
+	rconPassword: 'abcdefg',
+	
+	// function to turn a console command into a shell command to be injected into the minecraft server (return false to disable this feature)
 	prepConsoleCommand: function(cmd) {
 		var screenName = 'minecraft'; // name of screen session
 		// this is probably dangerous
@@ -21,7 +27,6 @@ module.exports = {
 	
 	// function to turn a message from discord into a raw json message for minecraft
 	prepRawMessage: function(author, text, message) {
-		text = text.replace(/[^A-Za-z0-9 !(),.?':;_\-+]/g, ''); // clean message
 		return [
 			{"text": "["},
 			{"text": "D", color: "blue"},
