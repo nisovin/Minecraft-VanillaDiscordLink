@@ -31,7 +31,8 @@ function startRcon() {
 		rconConnected = true;
 	});
 	rcon.on('response', function(str) {
-		//console.log('Rcon response', str);
+		console.log('Rcon response', str);
+		processConsoleLine(str, true);
 	});
 	rcon.on('error', function(err) {
 		console.log('Rcon error', err);
@@ -81,13 +82,16 @@ function processDiscordChat(message) {
 }
 
 // process console lines and send chat and player info to discord
-function processConsoleLine(line) {
+function processConsoleLine(line, fromRcon) {
+	if (line == null || line.length == 0) return;
 	if (consoleChannel != null) {
 		consoleChannel.send(line);
 	}
 	
-	if (!regexConsoleLine.test(line)) return;
-	line = line.substr(33);	
+	if (!(fromRcon)) {
+		if (!regexConsoleLine.test(line)) return;
+		line = line.substr(33);
+	}
 	
 	match = line.match(regexConsoleChat);
 	if (match != null) {
@@ -128,7 +132,6 @@ function processConsoleLine(line) {
 // send console command, use rcon if possible, fall back to shell command
 function sendConsoleCommand(cmd) {
 	if (rconConnected) {
-		console.log('sending rcon cmd');
 		rcon.send(cmd);
 	} else {
 		var shell = config.prepConsoleCommand(cmd);
